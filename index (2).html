@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HKpaycard – No-KYC Crypto Card</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #FF6600;
+    --orange-dark: #D26E2B;
+    --white: #FFFFFF;
+    --off-white: #F0EBE3;
+    --bg: #0A0805;
+    --bg2: #110D08;
+    --bg3: #1A1108;
+    --border: rgba(255,102,0,0.18);
+    --text-muted: rgba(240,235,227,0.55);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--off-white);
+    font-family: 'DM Mono', monospace;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.4;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 4rem;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(18px);
+    background: rgba(10,8,5,0.7);
+  }
+
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.25rem;
+    letter-spacing: -0.03em;
+    color: var(--white);
+  }
+  .nav-logo span { color: var(--orange); }
+
+  nav ul { display: flex; gap: 2.5rem; list-style: none; }
+  nav ul a {
+    font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-muted); text-decoration: none;
+    transition: color 0.2s;
+  }
+  nav ul a:hover { color: var(--orange); }
+
+  .nav-cta {
+    background: var(--orange);
+    color: var(--bg) !important;
+    padding: 0.5rem 1.2rem;
+    border-radius: 2px;
+    font-weight: 500;
+    transition: background 0.2s !important;
+  }
+  .nav-cta:hover { background: var(--orange-dark) !important; color: var(--white) !important; }
+
+  /* ─── HERO ─── */
+  .hero {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: grid; place-items: center;
+    padding: 8rem 4rem 5rem;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  /* big radial glow */
+  .hero::after {
+    content: '';
+    position: absolute;
+    width: 900px; height: 900px;
+    background: radial-gradient(circle, rgba(255,102,0,0.13) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -60%);
+    pointer-events: none;
+  }
+
+  /* hexagonal grid background */
+  .hex-grid {
+    position: absolute; inset: 0; z-index: -1;
+    background-image:
+      repeating-linear-gradient(60deg, var(--border) 0, var(--border) 1px, transparent 0, transparent 50%),
+      repeating-linear-gradient(120deg, var(--border) 0, var(--border) 1px, transparent 0, transparent 50%),
+      repeating-linear-gradient(0deg, var(--border) 0, var(--border) 1px, transparent 0, transparent 50%);
+    background-size: 40px 70px;
+    opacity: 0.35;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+  }
+
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--orange);
+    border: 1px solid var(--orange);
+    padding: 0.35rem 0.9rem;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.7s ease both;
+  }
+  .hero-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--orange);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.4); }
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--white);
+    margin-bottom: 1rem;
+    animation: fadeUp 0.7s 0.1s ease both;
+  }
+  .hero h1 em {
+    font-family: 'Syne', sans-serif;
+    font-style: normal;
+    font-weight: 800;
+    color: var(--orange);
+  }
+
+  .hero-sub {
+    font-size: 1rem; line-height: 1.7;
+    color: var(--text-muted);
+    max-width: 540px; margin: 0 auto 2.5rem;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+
+  .hero-actions {
+    display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: var(--orange);
+    color: var(--bg);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    padding: 0.9rem 2rem;
+    border-radius: 2px;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .btn-primary:hover { background: var(--orange-dark); transform: translateY(-2px); }
+
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: transparent;
+    color: var(--off-white);
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    padding: 0.9rem 2rem;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, transform 0.15s;
+  }
+  .btn-ghost:hover { border-color: var(--orange); color: var(--orange); transform: translateY(-2px); }
+
+  /* ─── CARD VISUAL ─── */
+  .card-scene {
+    position: relative; z-index: 1;
+    padding: 5rem 4rem;
+    display: flex; align-items: center; justify-content: center;
+    gap: 5rem; flex-wrap: wrap;
+  }
+
+  .card-3d {
+    position: relative;
+    width: 380px; height: 235px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #1e1208 0%, #2d1a08 40%, #3d2208 100%);
+    border: 1px solid rgba(255,102,0,0.3);
+    box-shadow:
+      0 0 0 1px rgba(255,102,0,0.08),
+      0 30px 80px rgba(0,0,0,0.7),
+      0 0 60px rgba(255,102,0,0.1);
+    padding: 2rem;
+    transform: perspective(800px) rotateY(-8deg) rotateX(4deg);
+    transition: transform 0.4s ease;
+    flex-shrink: 0;
+  }
+  .card-3d:hover {
+    transform: perspective(800px) rotateY(0deg) rotateX(0deg);
+  }
+
+  /* card shine */
+  .card-3d::before {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(255,102,0,0.15) 0%, transparent 50%, rgba(255,102,0,0.05) 100%);
+    pointer-events: none;
+  }
+
+  .card-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1.1rem;
+    color: var(--white); letter-spacing: -0.02em;
+  }
+  .card-logo span { color: var(--orange); }
+
+  .card-chip {
+    width: 42px; height: 32px;
+    background: linear-gradient(135deg, #c8952a, #f0c060, #c8952a);
+    border-radius: 5px;
+    margin-top: 1.2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-chip::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0.3);
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  }
+
+  .card-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.95rem;
+    letter-spacing: 0.22em;
+    color: rgba(255,255,255,0.75);
+    margin-top: 1.5rem;
+  }
+
+  .card-footer {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-top: 1rem;
+  }
+
+  .card-holder {
+    font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+  }
+  .card-name {
+    font-size: 0.78rem; letter-spacing: 0.08em;
+    color: var(--white); margin-top: 0.2rem;
+  }
+
+  .mc-logo {
+    display: flex;
+  }
+  .mc-logo .c1 {
+    width: 32px; height: 32px;
+    background: #EB001B;
+    border-radius: 50%;
+    opacity: 0.9;
+  }
+  .mc-logo .c2 {
+    width: 32px; height: 32px;
+    background: #F79E1B;
+    border-radius: 50%;
+    margin-left: -12px;
+    opacity: 0.9;
+  }
+
+  /* glow behind card */
+  .card-glow {
+    position: absolute;
+    width: 380px; height: 235px;
+    background: radial-gradient(ellipse, rgba(255,102,0,0.2) 0%, transparent 70%);
+    filter: blur(30px);
+    transform: perspective(800px) rotateY(-8deg) rotateX(4deg) translateY(30px) scale(0.9);
+    pointer-events: none;
+  }
+
+  .card-info {
+    max-width: 380px;
+  }
+
+  .card-info h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 2.2rem;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--white);
+    margin-bottom: 1.2rem;
+  }
+
+  .card-info h2 em {
+    font-family: 'Syne', sans-serif;
+    font-style: normal;
+    font-weight: 800;
+    color: var(--orange);
+  }
+
+  .card-specs {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+  }
+
+  .spec-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    font-size: 0.75rem; color: var(--text-muted);
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: rgba(255,102,0,0.03);
+    transition: border-color 0.2s;
+  }
+  .spec-item:hover { border-color: rgba(255,102,0,0.4); }
+  .spec-item .spec-icon { font-size: 1rem; }
+  .spec-item strong { color: var(--white); font-weight: 500; display: block; }
+
+  /* ─── SECTION COMMONS ─── */
+  section { position: relative; z-index: 1; }
+
+  .section-label {
+    font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--orange); margin-bottom: 0.8rem;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: clamp(2rem, 4vw, 3.2rem);
+    letter-spacing: -0.01em; color: var(--white);
+    line-height: 1.15; margin-bottom: 1rem;
+  }
+  .section-title em {
+    font-family: 'Syne', sans-serif;
+    font-style: normal; color: var(--orange); font-weight: 800;
+  }
+
+  /* ─── WHY SECTION ─── */
+  .why {
+    padding: 5rem 4rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .why-inner {
+    max-width: 1200px; margin: 0 auto;
+  }
+
+  .why-header { text-align: center; margin-bottom: 4rem; }
+
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5px;
+    border: 1px solid var(--border);
+  }
+
+  .why-item {
+    padding: 2.5rem;
+    border-right: 1px solid var(--border);
+    background: var(--bg2);
+    transition: background 0.3s;
+  }
+  .why-item:last-child { border-right: none; }
+  .why-item:hover { background: var(--bg3); }
+
+  .why-icon {
+    font-size: 2rem; margin-bottom: 1.2rem;
+    display: block;
+  }
+  .why-item h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 1rem;
+    color: var(--white); margin-bottom: 0.6rem;
+    letter-spacing: -0.01em;
+  }
+  .why-item p { font-size: 0.78rem; color: var(--text-muted); line-height: 1.7; }
+
+  /* ─── FEES ─── */
+  .fees {
+    padding: 6rem 4rem;
+    border-top: 1px solid var(--border);
+    background: var(--bg2);
+  }
+
+  .fees-inner { max-width: 1100px; margin: 0 auto; }
+  .fees-header { text-align: center; margin-bottom: 4rem; }
+
+  .fees-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--border);
+  }
+
+  .fees-table thead th {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 0.7rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--orange);
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,102,0,0.06);
+  }
+
+  .fees-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .fees-table tbody tr:last-child { border-bottom: none; }
+  .fees-table tbody tr:hover { background: rgba(255,102,0,0.04); }
+
+  .fees-table td {
+    padding: 1rem 1.5rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+  .fees-table td:first-child { color: var(--white); }
+  .fees-table td.fee-val {
+    color: var(--orange);
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+  }
+
+  .fee-note {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── HOW IT WORKS ─── */
+  .how {
+    padding: 6rem 4rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .how-inner { max-width: 1000px; margin: 0 auto; }
+  .how-header { text-align: center; margin-bottom: 4rem; }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+  }
+
+  .step {
+    padding: 3rem 2.5rem;
+    border-right: 1px solid var(--border);
+    position: relative;
+    background: var(--bg);
+    transition: background 0.3s;
+  }
+  .step:last-child { border-right: none; }
+  .step:hover { background: var(--bg3); }
+
+  .step-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 4rem; font-weight: 800;
+    color: rgba(255,102,0,0.12);
+    line-height: 1;
+    margin-bottom: 1.2rem;
+    letter-spacing: -0.05em;
+  }
+
+  .step h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 1.05rem;
+    color: var(--white); margin-bottom: 0.7rem;
+  }
+
+  .step p { font-size: 0.78rem; color: var(--text-muted); line-height: 1.7; }
+
+  .step-arrow {
+    position: absolute;
+    right: -14px; top: 50%;
+    transform: translateY(-50%);
+    width: 26px; height: 26px;
+    background: var(--orange);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+    color: var(--bg);
+    z-index: 2;
+    font-weight: 700;
+  }
+  .step:last-child .step-arrow { display: none; }
+
+  .step-bot {
+    text-align: center;
+    margin-top: 2.5rem;
+    padding: 2rem;
+    border: 1px solid var(--border);
+    background: rgba(255,102,0,0.04);
+  }
+  .step-bot p { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.8rem; }
+  .bot-handle {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 1.05rem;
+    color: var(--orange);
+    letter-spacing: -0.01em;
+  }
+
+  /* ─── CRYPTO SUPPORT ─── */
+  .crypto {
+    padding: 5rem 4rem;
+    border-top: 1px solid var(--border);
+    background: var(--bg2);
+  }
+  .crypto-inner { max-width: 1100px; margin: 0 auto; text-align: center; }
+  .crypto-header { margin-bottom: 3rem; }
+
+  .crypto-chips {
+    display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center;
+  }
+  .crypto-chip {
+    display: flex; align-items: center; gap: 0.7rem;
+    padding: 0.8rem 1.4rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+    font-size: 0.82rem;
+    color: var(--white);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .crypto-chip:hover { border-color: var(--orange); background: rgba(255,102,0,0.05); }
+  .crypto-chip .cc-icon { font-size: 1.2rem; }
+
+  /* ─── RISK DISCLAIMER ─── */
+  .risk {
+    padding: 4rem;
+    border-top: 1px solid var(--border);
+  }
+  .risk-inner {
+    max-width: 900px; margin: 0 auto;
+    border: 1px solid rgba(255,102,0,0.25);
+    background: rgba(255,102,0,0.04);
+    padding: 2.5rem;
+    border-radius: 4px;
+  }
+  .risk-inner h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 0.85rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--orange); margin-bottom: 1.2rem;
+  }
+  .risk-list {
+    list-style: none;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+  .risk-list li {
+    font-size: 0.74rem; color: var(--text-muted); line-height: 1.6;
+    padding-left: 1rem;
+    position: relative;
+  }
+  .risk-list li::before {
+    content: '—';
+    position: absolute; left: 0;
+    color: var(--orange-dark);
+  }
+
+  /* ─── CTA ─── */
+  .cta {
+    padding: 8rem 4rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .cta::before {
+    content: '';
+    position: absolute;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(255,102,0,0.1) 0%, transparent 65%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .cta h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: clamp(2.5rem, 5vw, 4.5rem);
+    letter-spacing: -0.01em; color: var(--white);
+    line-height: 1.15; margin-bottom: 1.2rem;
+  }
+  .cta h2 em {
+    font-family: 'Syne', sans-serif;
+    font-style: normal; color: var(--orange); font-weight: 800;
+  }
+  .cta p { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 2.5rem; }
+
+  .cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 4rem;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 1rem;
+  }
+  .footer-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1rem;
+    color: var(--white); letter-spacing: -0.02em;
+  }
+  .footer-logo span { color: var(--orange); }
+
+  footer p { font-size: 0.7rem; color: var(--text-muted); }
+
+  footer .footer-links {
+    display: flex; gap: 2rem; list-style: none;
+  }
+  footer .footer-links a {
+    font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-muted); text-decoration: none;
+    transition: color 0.2s;
+  }
+  footer .footer-links a:hover { color: var(--orange); }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 0.65s ease, transform 0.65s ease;
+  }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--orange-dark); border-radius: 2px; }
+
+  /* ─── MOBILE ─── */
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    nav ul { display: none; }
+    .hero { padding: 7rem 1.5rem 4rem; }
+    .card-scene { padding: 3rem 1.5rem; gap: 3rem; }
+    .card-3d { width: 100%; max-width: 340px; transform: none; }
+    .card-glow { display: none; }
+    .why, .fees, .how, .crypto, .risk, .cta { padding: 4rem 1.5rem; }
+    footer { padding: 2rem 1.5rem; }
+    .steps { grid-template-columns: 1fr; }
+    .step { border-right: none; border-bottom: 1px solid var(--border); }
+    .step:last-child { border-bottom: none; }
+    .step-arrow { display: none; }
+    .risk-list { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">HK<span>pay</span>card</div>
+  <ul>
+    <li><a href="#why">Why Us</a></li>
+    <li><a href="#fees">Fees</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#cta" class="nav-cta">Get Card →</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hex-grid"></div>
+  <div>
+    <div class="hero-tag">🔒 Privacy-First · No KYC · Instant</div>
+    <h1>Spend Crypto,<br><em>Stay Anonymous.</em></h1>
+    <p class="hero-sub">Virtual Mastercard issued in Hong Kong. No ID. No selfies. No verification. Load with crypto — spend in USD anywhere, worldwide.</p>
+    <div class="hero-actions">
+      <a href="#cta" class="btn-primary">🃏 Get Your Card →</a>
+      <a href="#fees" class="btn-ghost">View Fees</a>
+    </div>
+  </div>
+</section>
+
+<!-- CARD VISUAL -->
+<section class="card-scene">
+  <div style="position:relative">
+    <div class="card-glow"></div>
+    <div class="card-3d">
+      <div class="card-logo">HK<span>pay</span>card</div>
+      <div class="card-chip"></div>
+      <div class="card-number">•••• &nbsp;•••• &nbsp;•••• &nbsp;8821</div>
+      <div class="card-footer">
+        <div>
+          <div class="card-holder">Card Holder</div>
+          <div class="card-name">VIRTUAL CARD</div>
+        </div>
+        <div class="mc-logo">
+          <div class="c1"></div>
+          <div class="c2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-info fade-in">
+    <p class="section-label">Card Details</p>
+    <h2>A real card.<br><em>Zero paper trail.</em></h2>
+    <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.7;margin-bottom:1.5rem;">
+      Valid for 3 years. Works online, in-store, and through Apple Pay & Google Pay. No bank. No bureaucracy. Just you and your crypto.
+    </p>
+    <div class="card-specs">
+      <div class="spec-item"><span class="spec-icon">🇭🇰</span><div><strong>Hong Kong</strong>Issuer country</div></div>
+      <div class="spec-item"><span class="spec-icon">💳</span><div><strong>Mastercard</strong>Network</div></div>
+      <div class="spec-item"><span class="spec-icon">🌍</span><div><strong>Worldwide</strong>Acceptance</div></div>
+      <div class="spec-item"><span class="spec-icon">💵</span><div><strong>USD</strong>Billing currency</div></div>
+      <div class="spec-item"><span class="spec-icon">🍎</span><div><strong>Apple Pay</strong>Supported</div></div>
+      <div class="spec-item"><span class="spec-icon">🤖</span><div><strong>Google Pay</strong>Supported</div></div>
+      <div class="spec-item"><span class="spec-icon">✔️</span><div><strong>3 Years</strong>Card validity</div></div>
+      <div class="spec-item"><span class="spec-icon">📊</span><div><strong>$50K/mo</strong>Spend limit</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY -->
+<section class="why" id="why">
+  <div class="why-inner">
+    <div class="why-header fade-in">
+      <p class="section-label">Why HKpaycard</p>
+      <h2 class="section-title">Privacy isn't a feature.<br><em>It's the product.</em></h2>
+    </div>
+    <div class="why-grid">
+      <div class="why-item fade-in">
+        <span class="why-icon">🔒</span>
+        <h3>100% No-KYC</h3>
+        <p>No identity documents. No selfies. No personal verification of any kind. Issue and use your card in complete anonymity.</p>
+      </div>
+      <div class="why-item fade-in">
+        <span class="why-icon">⚡</span>
+        <h3>Instant Delivery</h3>
+        <p>Your virtual card details are delivered instantly after payment. No waiting days for approval or shipping.</p>
+      </div>
+      <div class="why-item fade-in">
+        <span class="why-icon">🌐</span>
+        <h3>Global Acceptance</h3>
+        <p>Spend at any online merchant worldwide, or tap to pay in-store via Apple Pay or Google Pay — anywhere Mastercard is accepted.</p>
+      </div>
+      <div class="why-item fade-in">
+        <span class="why-icon">₿</span>
+        <h3>Crypto Top-Ups</h3>
+        <p>Load your card using BTC, ETH, SOL, USDT, USDC and more. Seamless conversion — spend in USD globally.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CRYPTO SUPPORT -->
+<section class="crypto" id="crypto">
+  <div class="crypto-inner">
+    <div class="crypto-header fade-in">
+      <p class="section-label">Supported Currencies</p>
+      <h2 class="section-title">Load with your <em>crypto of choice</em></h2>
+    </div>
+    <div class="crypto-chips">
+      <div class="crypto-chip"><span class="cc-icon">🪙</span> Bitcoin (BTC)</div>
+      <div class="crypto-chip"><span class="cc-icon">🔹</span> Ethereum (ETH)</div>
+      <div class="crypto-chip"><span class="cc-icon">🌊</span> Solana (SOL)</div>
+      <div class="crypto-chip"><span class="cc-icon">💵</span> USDT (ETH)</div>
+      <div class="crypto-chip"><span class="cc-icon">💵</span> USDT (SOL)</div>
+      <div class="crypto-chip"><span class="cc-icon">🔵</span> USDC (ETH)</div>
+      <div class="crypto-chip"><span class="cc-icon">🔵</span> USDC (SOL)</div>
+      <div class="crypto-chip"><span class="cc-icon">＋</span> More on order</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEES -->
+<section class="fees" id="fees">
+  <div class="fees-inner">
+    <div class="fees-header fade-in">
+      <p class="section-label">Transparent Fees</p>
+      <h2 class="section-title">No surprises.<br><em>No hidden charges.</em></h2>
+      <p style="font-size:0.8rem;color:var(--text-muted);max-width:450px;margin:1rem auto 0;line-height:1.7;">No monthly fees. No annual fees. No inactivity charges. Just the fees below, clearly stated.</p>
+    </div>
+    <table class="fees-table">
+      <thead>
+        <tr>
+          <th>Fee Type</th>
+          <th>Amount</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Card Creation</td>
+          <td class="fee-val">$85</td>
+          <td>One-time fee</td>
+        </tr>
+        <tr>
+          <td>Deposit / Load</td>
+          <td class="fee-val">2%</td>
+          <td>Per top-up</td>
+        </tr>
+        <tr>
+          <td>Withdrawal</td>
+          <td class="fee-val">2% (min $0.50)</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Exchange</td>
+          <td class="fee-val">1% + $0.20</td>
+          <td>Currency conversion</td>
+        </tr>
+        <tr>
+          <td>Transaction</td>
+          <td class="fee-val">0.5% + $0.40</td>
+          <td>Per purchase</td>
+        </tr>
+        <tr>
+          <td>Decline</td>
+          <td class="fee-val">3% (min $0.50)</td>
+          <td>Per failed transaction</td>
+        </tr>
+        <tr>
+          <td>Refund</td>
+          <td class="fee-val">3% (min $0.50)</td>
+          <td>Per refunded transaction</td>
+        </tr>
+        <tr>
+          <td>Settlement Difference</td>
+          <td class="fee-val">2%</td>
+          <td>Applies in some cases</td>
+        </tr>
+        <tr>
+          <td>Monthly Spend Limit</td>
+          <td class="fee-val">$50,000</td>
+          <td>USD per month</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="fee-note">★ No monthly, annual, or inactivity fees. All fees listed in USD.</p>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="how-inner">
+    <div class="how-header fade-in">
+      <p class="section-label">How It Works</p>
+      <h2 class="section-title">Three steps to<br><em>financial freedom.</em></h2>
+    </div>
+    <div class="steps">
+      <div class="step fade-in">
+        <div class="step-num">01</div>
+        <div class="step-arrow">→</div>
+        <h3>Message the Bot</h3>
+        <p>DM <strong style="color:var(--orange)">@HKpaycardsupportbot</strong> on Telegram to start your order. No forms, no email, no paperwork.</p>
+      </div>
+      <div class="step fade-in">
+        <div class="step-num">02</div>
+        <div class="step-arrow">→</div>
+        <h3>Pay in Crypto</h3>
+        <p>Send the $85 creation fee plus any initial load amount in your preferred cryptocurrency. Fast, private, borderless.</p>
+      </div>
+      <div class="step fade-in">
+        <div class="step-num">03</div>
+        <h3>Start Spending</h3>
+        <p>Receive your virtual card details instantly. Add to Apple Pay or Google Pay and spend worldwide in minutes.</p>
+      </div>
+    </div>
+    <div class="step-bot fade-in">
+      <p>Ready? Message the bot directly to get started.</p>
+      <div class="bot-handle">✈️ @HKpaycardsupportbot</div>
+    </div>
+  </div>
+</section>
+
+<!-- RISK -->
+<section class="risk">
+  <div class="risk-inner fade-in">
+    <h3>⚠️ Important: Card Usage Policy</h3>
+    <p style="font-size:0.76rem;color:var(--text-muted);margin-bottom:1.2rem;line-height:1.6;">
+      Cards may be frozen or canceled (with or without balance refund) under the following risk conditions. Please use your card responsibly.
+    </p>
+    <ul class="risk-list">
+      <li>Failed transactions exceed 25% of monthly total</li>
+      <li>High number of consecutive failed transactions</li>
+      <li>High number of consecutive zero-amount transactions</li>
+      <li>Failed transaction significantly above card balance</li>
+      <li>Use at high-risk merchants (gambling, gas stations, financial services)</li>
+      <li>Excessive refund transactions (AML compliance)</li>
+      <li>Card unused for more than 30 days</li>
+    </ul>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="cta">
+  <div class="fade-in">
+    <p class="section-label">Get Started Today</p>
+    <h2>Stay private.<br><em>Spend freely.</em></h2>
+    <p>Join privacy enthusiasts, digital nomads, and freelancers worldwide.<br>Your card. Your crypto. Your business.</p>
+    <div class="cta-actions">
+      <a href="https://t.me/HKpaycardsupportbot" class="btn-primary" target="_blank">🃏 Order via Telegram →</a>
+      <a href="#why" class="btn-ghost">Learn More</a>
+    </div>
+    <p style="margin-top:2rem;font-size:0.72rem;color:var(--text-muted);">Telegram: <strong style="color:var(--orange)">@HKpaycardsupportbot</strong></p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">HK<span>pay</span>card</div>
+  <p>🇭🇰 Issued in Hong Kong &nbsp;·&nbsp; 💳 Mastercard Network &nbsp;·&nbsp; 🌍 Worldwide Acceptance</p>
+  <ul class="footer-links">
+    <li><a href="#why">Features</a></li>
+    <li><a href="#fees">Fees</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="https://t.me/HKpaycardsupportbot" target="_blank">Telegram</a></li>
+  </ul>
+</footer>
+
+<script>
+  // Scroll-triggered fade-ins
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Parallax glow on hero
+  document.addEventListener('mousemove', (e) => {
+    const card = document.querySelector('.card-3d');
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = (e.clientX - cx) / window.innerWidth;
+    const dy = (e.clientY - cy) / window.innerHeight;
+    card.style.transform = `perspective(800px) rotateY(${-8 + dx * 12}deg) rotateX(${4 - dy * 8}deg)`;
+  });
+</script>
+</body>
+</html>
